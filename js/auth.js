@@ -1,21 +1,20 @@
-import { auth, googleProvider, signInWithPopup, signOut, onAuthStateChanged, doc, getDoc, setDoc } from "./firebase-config.js";
+import { auth, googleProvider, signInWithPopup, signOut, onAuthStateChanged, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc as firestoreDoc, getDoc as firestoreGetDoc, setDoc as firestoreSetDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { db } from "./firebase-config.js";
 
 const authBtn = document.getElementById("auth-btn");
 const coinCount = document.getElementById("coin-count");
 
-// Monitor Auth State
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         authBtn.innerText = "Sign Out";
-        // Fetch or create user document in Firestore
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
+        const userRef = firestoreDoc(db, "users", user.uid);
+        const userSnap = await firestoreGetDoc(userRef);
 
         if (userSnap.exists()) {
             coinCount.innerText = userSnap.data().tokens.freeCoins;
         } else {
-            // New user, create document
-            await setDoc(userRef, {
+            await firestoreSetDoc(userRef, {
                 uid: user.uid,
                 email: user.email,
                 tokens: { freeCoins: 100 }
@@ -28,7 +27,6 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// Handle Sign In/Out
 authBtn.addEventListener("click", () => {
     if (auth.currentUser) {
         signOut(auth);
